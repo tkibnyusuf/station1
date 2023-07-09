@@ -1,0 +1,85 @@
+Step 1–Creating files to be used for config-maps creation–
+In this context to create the config-maps you will be creating 2 plaintext files with some sample data, in actual scenario config-maps can be created with 1 or more files containing the relevant configuration of the required environment and need not be only plaintext files.Command to create the 2 files for this demo –
+
+echo -n 'Welcome to File 1 for Config Map Creation' > test_file_1.txt
+echo -n 'Welcome to File 2 for Config Map Creation' > test_file_2.txt
+
+Above commands creates two files ‘test_file_1.txt’ and ‘test_file_2.txt’ with the sample data provided.
+
+Step 2– Creating the configmap–
+
+Now you can create the configmap using the 2 files created in the previous step by giving the below command–
+
+kubectl create configmap demo-configmap --from-file=test_file_1.txt --from-file=test_file_2.txt
+
+Command Syntax –
+kubectl create configmap <configmap-name> --from-file=<file-path/file-name>
+You can verify that the configmap got created by giving the below command –
+kubectl get configmaps
+
+This will display the configmaps created with the name provided during creation.
+
+Step 3–Viewing the configmap –You can output the contents of the configmap by providing the below command –
+kubectl get configmaps demo-configmap -o yaml
+
+Command Syntax –
+kubectl get configmaps <configmap-name> -o yaml
+
+This will display the contents and details of the configmap mentioned.
+
+Creating a Pod and consuming the configmap created –
+Step 1–
+Creating Pod Manifest file –
+
+You will need to create a Pod Manifest file (.yaml file) using which a nginx Pod application will be deployed and inside the manifest file you need to configure the Pod to use the configmap created. 
+The manifest file will have the below specifications –
+#nginx-pod-demo-configmap.yaml
+vi nginx-pod-demo-configmap.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod-demo-configmap
+spec:
+  containers:
+  - name: nginx-container
+    image: nginx
+    volumeMounts:
+    - name: test-vol
+      mountPath: /etc/config-map-data
+      readOnly: true
+  volumes:
+    - name: test-vol
+      configMap:
+        name: demo-configmap
+        items:
+        - key: test_file_1.txt
+          path: test_file_1.txt
+        - key: test_file_2.txt
+          path: test_file_2.txt
+
+save it
+
+You need to create a YAML file with the above content. In the ConfigMap section highlighted you need to mention the name of the config that was created in the earlier steps. Mount Path is the location inside the Pod where the configmap will be stored.
+ Here the name of the YAML file to be created is nginx-pod-demo-configmap.yaml
+
+
+Step 2 – Deploying the Pod –
+After creating the manifest file, the Pod can be deployed by giving the below command –
+kubectl create -f nginx-pod-demo-configmap.yaml
+
+Command Syntax–
+kubectl create -f <pod manifest file name/path>
+
+Step 3 –Validating the configmap inside the Pod –
+You can validate whether the Pod got successfully created with the configmap that was created in the earlier steps by giving the below command –
+kubectl exec nginx-pod-demo-configmap -- cat /etc/config-map-data/test_file_1.txt
+
+Command Syntax –
+kubectl exec <podname> -- cat <mountPath>/<filename>
+
+Cleaning up the cluster by removing the configmaps and Pods created–
+If you need to delete the configmaps created or the Pods deployed then the below commands can be used to perform the clean-up.
+
+kubectl delete configmaps <config-map-name>
+kubectl delete pods <pod-name>
