@@ -1,0 +1,31 @@
+Configure the Kubernetes ‘Master’ Node Instance
+
+kubeadm init --pod-network-cidr=172.31.0.0/16 
+(Private IP range of the Instances)
+
+This command takes a couple of minutes to execute, once the command execution is complete it will generate a kubeadm join command. This join command is to be noted down as it will be needed to join worker instances
+
+Step 4 –Run kubectl as a ‘regular’ user –
+
+To be able to run kubectl commands as a regular user execute the below commands –
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+Installing Calico network-plug-in for cluster networking –
+A network plugin needs to be installed to enable networking and communication inside the cluster this can be done by installing Calico network plugin by giving the below command –
+
+kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+
+
+Join worker EC2 instances to the cluster–
+Once the network plugin has been installed, you need to join the worker EC2 instances by executing the ‘kubeadm join’ command which was generated with kubeadm init on each of the EC2 worker instances respectively.
+
+Testing –
+Once the worker instances have been joined successfully, you can verify that the cluster is ready by executing the below command to see the status of the Nodes in the cluster-
+kubectl get nodes
+
+The Cluster Setup for Kubernetes using AWS EC2 instances is now complete.
