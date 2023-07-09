@@ -1,0 +1,53 @@
+Demonstration on Namespaces
+
+How to create a namespace in the cluster and create pods under it.
+Step 1 –
+View all the Namespaces
+To start connect to the master ec2 instance via SSH as the root user.
+You can give the command shown below to view all the namespaces in the cluster.
+kubectl get namespaces
+
+This list out all the namespaces in the cluster, initially there will be some namespaces already created by Kubernetes itself.
+
+Step 2–
+Creating a Custom Namespace
+To create a custom namespace,
+we will create a YAML file and deploy it.
+The content of the YAML file is shown below.
+YAML file name -namespace.yaml
+In this YAML file, 
+
+cat > namespace.yaml << EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: demonamespace
+EOF
+
+Namespace is being created specified by the kind section and the name of the custom namespace is ‘demo namespace’ as specified by the name section.
+To create the Namespace using the above shown YAML file you need to give the below command –
+kubectl apply -f namespace.yaml
+Command Syntax –
+kubectl apply -f <yaml-file-name>
+
+To Verify that the new custom namespace got created you can give the give the command to view all the namespaces as shown below –
+kubectl get namespaces
+
+Step 3–
+Deploying a Pod under the custom namespace created
+You can create Kubernetes resources under the namespace created in the previous step.
+ The below command creates a Pod under the custom namespace created in the previous step.
+kubectl run ns-pod --image=nginx --port=80 -n demonamespace
+Command Syntax –
+kubectl run <pod-name> --image=<img-name> --port=<port-no> -n <namespace-where-pod-is-to-be-deployed>
+To view the Pods created in the custom namespace given the below command
+ kubectl get pods --namespace demonamespace
+Command Syntax –
+kubectl get pods –namespace <namespace-name>
+
+Step 4–
+Deleting custom Namespace and resource created under it
+To delete Pods/resources under a custom namespace the below command can be given –
+kubectl delete pods <pod-name> -n <namespace-name>
+To delete custom namespace the below command can be given –
+kubectl delete namespace <namespace-name>
