@@ -1,0 +1,66 @@
+Kubernetes Dashboard Setup
+This is a  Demonstration on setting up the Kubernetes Dashboard which is a graphical web interface to manage the cluster
+
+Step 1 –
+Creating a cluster role binding –
+To start deploying the Dashboard connect to the master ec2 instance via SSH as the root user.
+Before installing the dashboard,
+you need to create cluster role binding to create a service account and grant admin rights of the cluster to that account so that the dashboard can be accessed.
+This can be done by creating a manifest file (.yaml) file with the below specification and deploying it.
+
+Create Kubernetes dashboard namespace
+kubectl create namespace kubernetes-dashboard
+
+ Create a  Service Account – kubernetes- dashboard
+vi kubernetes-dashboard.yml
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+save it
+
+kubectl create -f kubernetes-dashboard.yml
+
+vi cluster-role.yml
+create cluster rolebinding
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+save it
+
+kubectl create -f cluster-role.yml
+
+
+Deploying the Dashboard–
+To deploy the dashboard, you need to give the below command –
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+
+Here to deploy the kubernetes Dashboard the official GIT repo of Kubernetes Dashboard is being referred, as there are continuous new releases in process, the latest version to deploy can be found by going to link- https://github.com/kubernetes/dashboard
+
+Getting access to the Dashboard –
+To access the dashboard from the local browser, a cluster role for ‘anonymous-user’ needs to be created by giving the below command –
+
+kubectl create clusterrolebinding cluster-system-anonymous --clusterrole=cluster-admin --user=system:anonymous
+
+
+generate token for dashboard
+kubectl -n kubernetes-dashboard create token admin-user
+
+Accessing the Dashboard –The dashboard can be accessed from your local browser by going to the below link –
+https://34.238.121.38:6443/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+In the above URL the Public IP/DNS name of the master EC2 should be replaced as highlighted in yellow and 6443 is the port no to access the Dashboard.
+Upon browsing to the URL, you will be prompted to enter the credentials to login the dashboard as shown below –
