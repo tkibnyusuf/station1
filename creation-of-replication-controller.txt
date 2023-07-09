@@ -1,0 +1,68 @@
+Demonstration on Replication Controller
+
+How to create a replication controller in the cluster and how to scale in and out.
+Step 1 –
+Creating YAML file for Replication Controller
+To start connect to the master ec2 instance via SSH as the root user.
+To create the replication controller a YAML file needs to be created with the below shown content.
+Name of the YAML file –demo-rc.yaml
+
+cat > demo-rc.yaml << EOF
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx-rc
+spec:
+  replicas: 2
+  selector:
+    app: nginx-app
+  template:
+    metadata:
+      name: nginx-pod
+      labels:
+        app: nginx-app
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx
+        ports:
+        - containerPort: 80
+EOF
+
+
+The name of the replication controller is ‘nginx-rc’ as specified in the name section under metadata.
+The Replication controller will create 2 Pods as specified under replicas section.
+The Pod specification is specified under template section. The Pod label specified under labels section and the app mentioned in the selector should be same as highlighted.
+
+To create the RC from the above YAML give the below command –
+kubectl create -f demo-rc.yaml
+To view the Pods created and the Replication controller create give the below commands –
+kubectl get pods
+kubectl get rc
+
+The working of the replication controller can be tested by manually shutting down any of the worker nodes where the Pods are running and observing that to maintain the desired Pod count as mentioned in the YAML file RC will automatically re-launch new Pods in the available worker node
+To view more details about the RC created the below command can be given –
+kubectl describe rc <rc-name>
+kubectl describe rc nginx-rc
+kubectl get pods -l app=nginx-app -o wide
+kubectl get pods -o wide --watch
+
+Step 2 –
+
+Scaling Pods using Replication Controller Based on the incoming traffic to the application the number of Pods can be scaled up and down easily using the replication controller by giving the command –
+kubectl scale rc nginx-rc --replicas=4
+This will scale the number of Pods to 4.
+Command Syntax –
+kubectl scale rc <rc-name> --replicas=<desired replica>
+
+Similarly, when traffic to the application decreases the number of Pods can be reduced by scaling down the replica count.
+Example –
+kubectl scale rc nginx-rc --replicas=2
+
+Step 3 –
+Delete Replication Controller and the Pods
+The Replication controller and the Pods created can be delete by using the same YAML file which was created in 
+Step 1 by giving the command –
+kubectl delete -f demo-rc.yaml
+Command Syntax –
+kubectl delete -f <yaml-file-name.yaml>
