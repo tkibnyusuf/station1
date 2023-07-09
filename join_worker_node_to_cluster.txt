@@ -5,7 +5,7 @@ kubeadm init --pod-network-cidr=172.31.0.0/16
 
 This command takes a couple of minutes to execute, once the command execution is complete it will generate a kubeadm join command. This join command is to be noted down as it will be needed to join worker instances
 
-Step 4 –Run kubectl as a ‘regular’ user –
+–Run kubectl as a ‘regular’ user –
 
 To be able to run kubectl commands as a regular user execute the below commands –
 
