@@ -104,24 +104,35 @@ resource "aws_security_group" "ec2_security_group6" {
 
 
 # use data source to get a registered amazon linux 2 ami
-data "aws_ami" "amazon_linux_2" {
+data "aws_ami" "al2023" {
   most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
+  owners      = ["137112412989"] # Amazon
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm*"]
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
   }
 }
 
+
 # launch the ec2 instance
 resource "aws_instance" "ec2_instance" {
-  ami                    = data.aws_ami.amazon_linux_2.id
+  ami                    = data.aws_ami.al2023.id
   instance_type          = "t2.medium"
   subnet_id              = aws_default_subnet.default_az1.id
   vpc_security_group_ids = [aws_security_group.ec2_security_group6.id]
@@ -157,4 +168,5 @@ resource "aws_instance" "ec2_instance" {
 # print the url of the container
 output "container_url" {
  value = ["${aws_instance.ec2_instance.*.public_ip}"]
+
 }
