@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: nginx-container
-        image: nginx:1.7.9
+        image: nginx:1.27
         ports:
         - containerPort: 80
 EOF
@@ -112,4 +112,5 @@ Step 6:
 Cleaning up the resources
  The deployments and the service created can be deleted by giving the below commands –
 kubectl delete -f <filename/path of deployment manifest file>
+
 kubectl delete -f <filename/path of service manifest file>
