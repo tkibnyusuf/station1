@@ -1,6 +1,9 @@
 Configure the Kubernetes ‘Master’ Node Instance
 
-kubeadm init --pod-network-cidr=172.31.0.0/16 
+sudo kubeadm init \
+  --pod-network-cidr=192.168.0.0/16 \
+  --service-cidr=10.96.0.0/12
+
 (Private IP range of the Instances)
 
 This command takes a couple of minutes to execute, once the command execution is complete it will generate a kubeadm join command. This join command is to be noted down as it will be needed to join worker instances
@@ -10,15 +13,36 @@ This command takes a couple of minutes to execute, once the command execution is
 To be able to run kubectl commands as a regular user execute the below commands –
 
 mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
 
 
 Installing Calico network-plug-in for cluster networking –
 A network plugin needs to be installed to enable networking and communication inside the cluster this can be done by installing Calico network plugin by giving the below command –
 
-kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.24.1/manifests/tigera-operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/tigera-operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/custom-resources.yaml
+
+kubectl patch installation.operator.tigera.io default --type=merge -p '{
+  "spec": {
+    "calicoNetwork": {
+      "ipPools": [
+        {
+          "blockSize": 26,
+          "cidr": "192.168.0.0/16",
+          "encapsulation": "VXLANCrossSubnet",
+          "natOutgoing": "Enabled",
+          "nodeSelector": "all()"
+        }
+      ]
+    }
+  }
+}'
+
+kubectl get pods -A
+kubectl get nodes
+
 
 
 Join worker EC2 instances to the cluster–
