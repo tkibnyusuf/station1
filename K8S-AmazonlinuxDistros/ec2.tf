@@ -142,27 +142,8 @@ resource "aws_instance" "ec2_instance" {
   tags = {
     Name = "kubernetes server"
   }
-
-  connection {
-    type        = "ssh"
-    user        = "ec2-user"
-    private_key = file("~/Downloads/devopskeypair.pem")
-    host = self.public_ip
-
-
-}
-
-  provisioner "file" {
-    source      = "install_k8s.sh"
-    destination = "/tmp/install_k8s.sh"
-
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-        "sudo chmod +x /tmp/install_k8s.sh",
-        "sudo su -c'bash /tmp/install_k8s.sh'",
-    ]
+  root_block_device {
+    volume_size = 8
   }
 }
 # print the url of the container
@@ -170,3 +151,4 @@ output "container_url" {
  value = ["${aws_instance.ec2_instance.*.public_ip}"]
 
 }
+
